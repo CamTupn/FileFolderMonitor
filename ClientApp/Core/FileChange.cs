@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClientApp.Core
 {
-    internal class FileChange
+    // Model tương ứng với FileChange bên ServerApp – dùng để deserialize JSON nhận từ server
+    public class FileChange
     {
+        public string FileName { get; set; }
+        public string Action { get; set; }
+        public DateTime Time { get; set; }
     }
 }
