@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace ClientApp.Core
 {
@@ -16,7 +17,7 @@ namespace ClientApp.Core
         public Action<FileChange> OnChangeReceived;
         // Gọi khi trạng thái kết nối thay đổi (truyền chuỗi mô tả trạng thái)
         public Action<string> OnStatusChange;
-
+        public Action<string> OnFolderReceived;
         // ── Trạng thái nội bộ ────────────────────────────────────────────────
         private TcpClient _client;
         private bool _isRunning;
@@ -29,18 +30,24 @@ namespace ClientApp.Core
         // ── Kết nối / Ngắt kết nối ───────────────────────────────────────────
         public void Connect(string host, int port)
         {
+            if (_isRunning) return;
             _host = host;
             _port = port;
             _isRunning = true;
 
-            // Chạy vòng lặp nhận dữ liệu trên background thread để không block UI
             Task.Run(() => ReceiveLoop());
         }
 
         public void Disconnect()
         {
             _isRunning = false;
-            try { _client?.Close(); } catch { }
+            try
+            {
+                _client?.Close();
+            }
+            catch { }
+
+            _client = null; 
             OnStatusChange?.Invoke("Disconnected");
         }
 
@@ -72,17 +79,17 @@ namespace ClientApp.Core
                 catch (Exception ex)
                 {
                     if (!_isRunning) break;  // Ngắt kết nối chủ động → không reconnect
-                    OnStatusChange?.Invoke($"Lost connection. Retrying... ({ex.Message})");
+                    OnStatusChange?.Invoke($"Lost connection.({ex.Message})");
                 }
                 finally
                 {
                     try { _client?.Close(); } catch { }
-                    _buffer.Clear();
                 }
 
-                // Chờ 3 giây trước khi thử kết nối lại
-                if (_isRunning)
-                    Thread.Sleep(3000);
+                for (int i = 0; i < 30 && _isRunning; i++)
+                {
+                    Thread.Sleep(100); 
+                }
             }
         }
 
@@ -91,37 +98,57 @@ namespace ClientApp.Core
         // Nếu server chưa gửi '\n', client vẫn hoạt động được nhờ thử parse trực tiếp.
         private void ProcessBuffer()
         {
-            string raw = _buffer.ToString();
-
-            // Trường hợp server gửi message kết thúc bằng '\n' (delimiter chuẩn)
-            int newlineIdx;
-            while ((newlineIdx = raw.IndexOf('\n')) >= 0)
+            while (true)
             {
-                string jsonPart = raw.Substring(0, newlineIdx).Trim();
-                raw = raw.Substring(newlineIdx + 1);
-
-                if (!string.IsNullOrEmpty(jsonPart))
-                    TryDeserializeAndNotify(jsonPart);
-            }
-
-            // Trường hợp server KHÔNG dùng delimiter (code server hiện tại):
-            // Thử parse toàn bộ buffer như 1 JSON object. Nếu thành công thì xử lý và xóa buffer.
-            if (raw.Length > 0)
-            {
-                string trimmed = raw.Trim();
-                if (trimmed.StartsWith("{") && trimmed.EndsWith("}"))
+                string bufferStr = _buffer.ToString();
+                int idx = bufferStr.IndexOf('\n');
+                // chưa đủ 1 message
+                if (idx < 0) break;
+                // lấy 1 dòng hoàn chỉnh
+                string raw = bufferStr.Substring(0, idx).Trim();
+                // xóa khỏi buffer
+                _buffer.Remove(0, idx + 1);
+                if (string.IsNullOrEmpty(raw)) continue;
+                // xử lý command trước (không phải JSON)
+                if (raw.StartsWith("FOLDER|"))
                 {
-                    if (TryDeserializeAndNotify(trimmed))
-                        raw = string.Empty;
+                    string folder = raw.Substring("FOLDER|".Length);
+                    OnFolderReceived?.Invoke(folder);
+                    continue;
+                }
+                //xử lý JSON (history + realtime)
+                if (!TryDeserializeAndNotify(raw))
+                {
+                    Console.WriteLine("Parse lỗi: " + raw);
                 }
             }
-
-            _buffer.Clear();
-            _buffer.Append(raw);
         }
+        public void RequestFolder()
+        {
+            if (_client == null || !_client.Connected) return;
 
+            string cmd = "GET_FOLDER\n";
+            byte[] data = Encoding.UTF8.GetBytes(cmd);
+
+            var stream = _client.GetStream();
+            stream.Write(data, 0, data.Length);
+        }
         private bool TryDeserializeAndNotify(string json)
         {
+            try
+            {
+                var list = JsonConvert.DeserializeObject<List<FileChange>>(json);
+
+                if (list != null)
+                {
+                    foreach (var item in list)
+                        OnChangeReceived?.Invoke(item);
+
+                    return true;
+                }
+            }
+            catch { }
+
             try
             {
                 var change = JsonConvert.DeserializeObject<FileChange>(json);
@@ -131,8 +158,18 @@ namespace ClientApp.Core
                     return true;
                 }
             }
-            catch { /* JSON chưa hoàn chỉnh hoặc lỗi – giữ lại trong buffer */ }
+            catch { }
+
             return false;
+        }
+        public void RequestHistory(string folder)
+        {
+            if (_client == null || !_client.Connected) return;
+            string cmd = $"GET_HISTORY|{folder}\n";
+            byte[] data = Encoding.UTF8.GetBytes(cmd);
+
+            var stream = _client.GetStream();
+            stream.Write(data, 0, data.Length);
         }
     }
 }
