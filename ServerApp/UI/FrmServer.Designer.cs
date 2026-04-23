@@ -31,13 +31,11 @@
             this.btnStart = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.btnBrowse = new System.Windows.Forms.Button();
-            this.btnClear = new System.Windows.Forms.Button();
             this.txtPort = new System.Windows.Forms.TextBox();
             this.txtFolder = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.lstLog = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // btnStart
@@ -74,17 +72,6 @@
             this.btnBrowse.Text = "Browse";
             this.btnBrowse.UseVisualStyleBackColor = true;
             this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
-            // 
-            // btnClear
-            // 
-            this.btnClear.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClear.Location = new System.Drawing.Point(474, 281);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(66, 30);
-            this.btnClear.TabIndex = 3;
-            this.btnClear.Text = "Clear";
-            this.btnClear.UseVisualStyleBackColor = true;
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // txtPort
             // 
@@ -133,27 +120,16 @@
             this.lblStatus.TabIndex = 8;
             this.lblStatus.Text = "Waiting Connect/Disconected";
             // 
-            // lstLog
-            // 
-            this.lstLog.FormattingEnabled = true;
-            this.lstLog.ItemHeight = 16;
-            this.lstLog.Location = new System.Drawing.Point(28, 147);
-            this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(440, 164);
-            this.lstLog.TabIndex = 9;
-            // 
             // FrmServer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 387);
-            this.Controls.Add(this.lstLog);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtFolder);
             this.Controls.Add(this.txtPort);
-            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.btnBrowse);
             this.Controls.Add(this.btnStop);
             this.Controls.Add(this.btnStart);
@@ -169,13 +145,11 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Button btnBrowse;
-        private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.TextBox txtPort;
         private System.Windows.Forms.TextBox txtFolder;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lblStatus;
-        private System.Windows.Forms.ListBox lstLog;
     }
 }
 

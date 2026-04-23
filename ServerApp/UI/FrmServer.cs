@@ -19,6 +19,7 @@ namespace ServerApp.UI
         public FrmServer()
         {
             InitializeComponent();
+            DbHelper.Init();
             lblStatus.Text = "Waiting...";
             btnStop.Enabled = false;
         }
@@ -64,19 +65,8 @@ namespace ServerApp.UI
                 }));
             };
             server.Start(port);
-            // Khởi tạo FileWatcher và bắt đầu theo dõi thư mục
+            server.SetFolder(txtFolder.Text);
             watcher = new FileWatcher(server);
-            // Thiết lập callback để hiển thị log thay đổi file lên ListBox
-            watcher.OnLog = (msg) =>
-            {
-                Invoke(new Action(() =>
-                {
-                    lstLog.Items.Add(msg);
-                    // auto scroll xuống dưới
-                    lstLog.TopIndex = lstLog.Items.Count - 1;
-                }));
-            };
-            // Bắt đầu theo dõi thư mục đã chọn
             watcher.Start(txtFolder.Text);
             lblStatus.Text = "Server running...";
             btnStart.Enabled = false;
@@ -90,16 +80,9 @@ namespace ServerApp.UI
             server?.Stop();
             lblStatus.Text = "Server stopped";
             lblStatus.ForeColor = Color.Red;
-            lstLog.Items.Clear();
             // Cập nhật trạng thái và nút bấm
             btnStart.Enabled = true;
             btnStop.Enabled = false;
-        }
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            // Xóa log hiển thị trên ListBox
-            lstLog.Items.Clear();
         }
     }
 }

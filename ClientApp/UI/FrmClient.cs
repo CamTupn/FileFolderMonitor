@@ -1,13 +1,16 @@
-﻿using System;
+﻿using ClientApp.Core;
+using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
-using ClientApp.Core;
 
 namespace ClientApp.UI
 {
     public partial class FrmClient : Form
     {
         private ClientCore _client;
+        private string _serverFolder;
 
         public FrmClient()
         {
@@ -43,7 +46,10 @@ namespace ClientApp.UI
 
             // Khởi tạo ClientCore
             _client = new ClientCore();
-
+            _client.OnFolderReceived = (folder) =>
+            {
+                _serverFolder = folder;
+            };
             // Callback nhận thay đổi file từ server
             _client.OnChangeReceived = (change) =>
             {
@@ -55,7 +61,7 @@ namespace ClientApp.UI
                     lstLog.TopIndex = lstLog.Items.Count - 1; // auto-scroll
 
                     // Flash thông báo trên TaskBar
-                    FlashTaskbar();
+                    //FlashTaskbar();
                 }));
             };
 
@@ -67,6 +73,8 @@ namespace ClientApp.UI
                     if (msg.StartsWith("Connected"))
                     {
                         SetStatus(msg, Color.Green);
+                        _client.RequestFolder();
+                        btnLoadHistory.Enabled = true;
                     }
                     else if (msg.StartsWith("Lost") || msg.StartsWith("Retry"))
                     {
@@ -77,6 +85,7 @@ namespace ClientApp.UI
                         SetStatus(msg, Color.Red);
                         btnConnect.Enabled = true;
                         btnDisconnect.Enabled = false;
+                        btnLoadHistory.Enabled = false;
                     }
                 }));
             };
@@ -126,11 +135,23 @@ namespace ClientApp.UI
             }
         }
 
-        // ── Helper: nhấp nháy icon trên Taskbar khi có thông báo mới ─────────
-        private void FlashTaskbar()
+        private void btnLoadHistory_Click(object sender, EventArgs e)
         {
-            if (!this.Focused)
-                NativeMethods.FlashWindow(this.Handle);
+            if (_client == null)
+            {
+                MessageBox.Show("Chưa connect tới server!");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_serverFolder))
+            {
+                MessageBox.Show("Chưa nhận được folder từ server!");
+                return;
+            }
+
+            lstLog.Items.Clear();
+            _client.RequestHistory(_serverFolder);
         }
+
     }
 }
