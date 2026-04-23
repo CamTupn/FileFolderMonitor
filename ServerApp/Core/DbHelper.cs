@@ -10,6 +10,7 @@ namespace ServerApp.Core
     internal class DbHelper
     {
         private static string connStr = "Data Source=log.db";
+        // tạo bảng
         public static void Init()
         {
             using (var conn = new SQLiteConnection(connStr))
@@ -25,6 +26,7 @@ namespace ServerApp.Core
                 cmd.ExecuteNonQuery();
             }
         }
+        // lưu dữ liệu vào database
         public static void Insert(string file, string action, string time, string folder)
         {
             using (var conn = new SQLiteConnection(connStr))
@@ -39,6 +41,7 @@ namespace ServerApp.Core
                 cmd.ExecuteNonQuery();
             }
         }
+        // lấy tất cả dữ liệu từ database
         public static List<FileChange> GetAll()
         {
             List<FileChange> list = new List<FileChange>();
@@ -63,6 +66,7 @@ namespace ServerApp.Core
             }
             return list;
         }
+        // lấy dữ liệu theo folder
         public static List<FileChange> GetByFolder(string folder)
         {
             List<FileChange> list = new List<FileChange>();
