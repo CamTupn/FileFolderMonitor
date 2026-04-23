@@ -13,7 +13,6 @@ namespace ServerApp.UI
 {
     public partial class FrmServer : Form
     {
-        // Khai báo biến để quản lý ServerCore và FileWatcher
         private ServerCore server;
         private FileWatcher watcher;
         public FrmServer()
@@ -37,27 +36,26 @@ namespace ServerApp.UI
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            // Kiểm tra nếu port hoặc folder chưa được nhập, hiển thị thông báo lỗi và dừng quá trình khởi động
+            // Kiểm tra nếu port hoặc folder đã được nhập chưa
             if (string.IsNullOrEmpty(txtPort.Text) || string.IsNullOrEmpty(txtFolder.Text))
             {
                 MessageBox.Show("Nhập port và chọn folder!");
                 return;
             }
-            // Kiểm tra nếu thư mục không tồn tại, hiển thị thông báo lỗi và dừng quá trình khởi động
             int port;
             if (!int.TryParse(txtPort.Text, out port))
             {
                 MessageBox.Show("Port không hợp lệ!");
                 return;
             }
-            // Khởi tạo ServerCore và bắt đầu lắng nghe trên cổng đã nhập
+            // Khởi tạo ServerCore 
             server = new ServerCore();
             server.OnStatusChange = (msg) =>
             {
                 Invoke(new Action(() =>
                 {
                     lblStatus.Text = msg;
-                    // Đổi màu status: nếu msg chứa "0" thì đỏ, ngược lại xanh
+                    // Đổi màu status
                     if (msg.Contains("0"))
                         lblStatus.ForeColor = Color.Red;
                     else
@@ -65,8 +63,8 @@ namespace ServerApp.UI
                 }));
             };
             server.Start(port);
-            server.SetFolder(txtFolder.Text);
-            watcher = new FileWatcher(server);
+            server.SetFolder(txtFolder.Text); // Cập nhật thư mục theo dõi cho ServerCore
+            watcher = new FileWatcher(server); // Khởi tạo FileWatcher và truyền ServerCore vào
             watcher.Start(txtFolder.Text);
             lblStatus.Text = "Server running...";
             btnStart.Enabled = false;
