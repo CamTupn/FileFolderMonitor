@@ -1,9 +1,11 @@
-﻿using System;
+﻿using ServerApp.Core;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace ServerApp.Core
 {
@@ -54,11 +56,13 @@ namespace ServerApp.Core
             // Xác định loại đối tượng được tạo là file hay folder dựa trên việc có phần mở rộng hay không
             string type = Path.HasExtension(e.Name) ? "File" : "Folder";
             // Gửi log
-            OnLog?.Invoke($"{Now()} | {type} | {e.Name} | Created");
+            string folder = watcher.Path;
+            OnLog?.Invoke($"{Now()} | {type} | {e.FullPath} | Created");
+            DbHelper.Insert(e.FullPath, "Created", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), folder);
             // Gửi thông tin thay đổi lên server để broadcast cho các client
             server.Broadcast(new FileChange
             {
-                FileName = e.Name,
+                FileName = e.FullPath,
                 Action = "Created",
                 Time = DateTime.Now
             });
@@ -67,16 +71,18 @@ namespace ServerApp.Core
         // ================= DELETED =================
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
+            string folder = watcher.Path;
             // Nếu file bị xóa là file tạm, không gửi thông tin lên server.
             if (IsTemp(e.Name)) return;
             // Xác định loại đối tượng bị xóa là file hay folder dựa trên việc có phần mở rộng hay không
             string type = Path.HasExtension(e.Name) ? "File" : "Folder";
             // Gửi log
-            OnLog?.Invoke($"{Now()} | {type} | {e.Name} | Deleted");
+            OnLog?.Invoke($"{Now()} | {type} | {e.FullPath} | Deleted");
+            DbHelper.Insert(e.FullPath, "Deleted", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), folder);
             // Gửi thông tin thay đổi lên server để broadcast cho các client
             server.Broadcast(new FileChange
             {
-                FileName = e.Name,
+                FileName = e.FullPath,
                 Action = "Deleted",
                 Time = DateTime.Now
             });
@@ -85,6 +91,7 @@ namespace ServerApp.Core
         // ================= CHANGED =================
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
+            string folder = watcher.Path;
             // Nếu file bị thay đổi là file tạm, không gửi thông tin lên server.
             if (IsTemp(e.Name)) return;
             // Chỉ quan tâm đến sự kiện thay đổi của file, bỏ qua folder.
@@ -98,10 +105,11 @@ namespace ServerApp.Core
                     return;
             }
             lastEvent[key] = DateTime.Now;
-            OnLog?.Invoke($"{Now()} | File | {e.Name} | Modified");
+            OnLog?.Invoke($"{Now()} | File | {e.FullPath} | Modified");
+            DbHelper.Insert(e.FullPath, "Modified", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), folder);
             server.Broadcast(new FileChange
             {
-                FileName = e.Name,
+                FileName = e.FullPath,
                 Action = "Modified",
                 Time = DateTime.Now
             });
@@ -110,6 +118,7 @@ namespace ServerApp.Core
         // ================= RENAMED =================
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
+            string folder = watcher.Path;
             if (IsTemp(e.Name)) return;
             string key = e.FullPath;
             if (lastEvent.ContainsKey(key))
@@ -124,12 +133,11 @@ namespace ServerApp.Core
                e.OldName.StartsWith("~$"))
             {
                 tempFiles.Remove(e.OldFullPath);
-
-                OnLog?.Invoke($"{Now()} | File | {e.Name} | Modified");
-
+                OnLog?.Invoke($"{Now()} | File | {e.FullPath} | Modified");
+                DbHelper.Insert(e.FullPath, "Modified", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), folder);
                 server.Broadcast(new FileChange
                 {
-                    FileName = e.Name,
+                    FileName = e.FullPath,
                     Action = "Modified",
                     Time = DateTime.Now
                 });
@@ -137,11 +145,11 @@ namespace ServerApp.Core
                 return;
             }
             // rename bình thường
-            OnLog?.Invoke($"{Now()} | {e.OldName} -> {e.Name} | Renamed");
-
+            OnLog?.Invoke($"{Now()} | {e.OldFullPath} -> {e.FullPath} | Renamed");
+            DbHelper.Insert($"{e.OldFullPath} -> {e.FullPath}", "Renamed", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), folder);
             server.Broadcast(new FileChange
             {
-                FileName = $"{e.OldName} -> {e.Name}",
+                FileName = $"{e.OldFullPath} -> {e.FullPath}",
                 Action = "Renamed",
                 Time = DateTime.Now
             });
@@ -157,7 +165,7 @@ namespace ServerApp.Core
 
         private string Now() 
         {
-            return DateTime.Now.ToString("HH:mm:ss");
+            return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
         // Nhấn nút Stop
         public void Stop() 
