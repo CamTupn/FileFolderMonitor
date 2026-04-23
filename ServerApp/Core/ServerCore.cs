@@ -14,13 +14,12 @@ namespace ServerApp.Core
     // Lớp này quản lý server TCP, bao gồm việc lắng nghe kết nối từ client, gửi thông tin thay đổi file đến các client đã kết nối và quản lý trạng thái của server.
     public class ServerCore
     {
-        private readonly object _lock = new object();
-        // Lắng nghe kết nối từ client trên cổng đã chỉ định
-        private TcpListener server;
-        private List<TcpClient> clients = new List<TcpClient>(); // danh sách các client đã kết nối
-        private bool isRunning = false;
-        public Action<string> OnStatusChange;
-        private string currentFolder;
+        private readonly object _lock = new object(); 
+        private TcpListener server; // mở cổng và chờ client kết nối
+        private List<TcpClient> clients = new List<TcpClient>(); // lưu tất cả client đang connect
+        private bool isRunning = false; // trạng thái của server
+        public Action<string> OnStatusChange; // trạng thái server
+        private string currentFolder; // lưu folder đang theo dõi để gửi cho client
         public void SetFolder(string folder)
         {
             currentFolder = folder;
@@ -33,6 +32,7 @@ namespace ServerApp.Core
 
             stream.Write(data, 0, data.Length);
         }
+        // Xử lí từng client
         private void HandleClient(TcpClient client)
         {
             try
@@ -42,13 +42,13 @@ namespace ServerApp.Core
 
                 while (isRunning)
                 {
+                    // đọc dữ liệu từ client
                     int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead == 0) break;
-
+                    if (bytesRead == 0) break; // disconect
                     string msg = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-
                     foreach (var line in msg.Split('\n'))
                     {
+                        // chuẩn hóa lệnh
                         string cmd = line.Trim();
                         if (cmd == "GET_FOLDER")
                         {
@@ -72,8 +72,9 @@ namespace ServerApp.Core
         }
         private void SendHistory(TcpClient client, string folder)
         {
+            // lấy dữ liệu từ database
             var logs = DbHelper.GetByFolder(folder);
-            var stream = client.GetStream();
+            var stream = client.GetStream(); 
             foreach (var log in logs)
             {
                 string json = JsonConvert.SerializeObject(log) + "\n";
@@ -85,6 +86,7 @@ namespace ServerApp.Core
                 Thread.Sleep(2);
             }
         }
+        // khởi động server
         public void Start(int port)
         {
             // Khởi tạo TcpListener để lắng nghe trên tất cả các địa chỉ IP và cổng đã chỉ định
@@ -98,11 +100,11 @@ namespace ServerApp.Core
                 {
                     try
                     {
-                        // Chấp nhận kết nối từ client
+                        // Chờ client kết nối
                         var client = server.AcceptTcpClient(); 
                         clients.Add(client);
                         OnStatusChange?.Invoke($"Client Connected ({clients.Count})");
-                        Task.Run(() => HandleClient(client));
+                        Task.Run(() => HandleClient(client)); // mỗi client là 1 thread
                     }
                     catch
                     {
@@ -129,12 +131,10 @@ namespace ServerApp.Core
             }
             catch { }
         }
-        // Phương thức này được gọi để gửi thông tin thay đổi file đến tất cả các client đã kết nối.
-        // Thông tin thay đổi được serialize thành JSON và gửi qua stream của mỗi client.
+
         public void Broadcast(FileChange change)
         {
-            //DbHelper.Insert(change.FileName, change.Action, change.Time.ToString());
-            // Serialize đối tượng FileChange thành JSON và chuyển đổi thành byte array để gửi qua mạng
+            // Serialize đối tượng FileChange thành JSON 
             string json = JsonConvert.SerializeObject(change) + "\n";
             byte[] data = Encoding.UTF8.GetBytes(json);
             // Gửi dữ liệu đến tất cả các client đã kết nối.
@@ -148,7 +148,7 @@ namespace ServerApp.Core
                         stream.Write(data, 0, data.Length);
                     }
                 }
-                catch
+                catch // client disconnected
                 {
                     clients.Remove(client);
                     OnStatusChange?.Invoke($"Clients connected: {clients.Count}");
