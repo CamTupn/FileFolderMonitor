@@ -8,26 +8,17 @@ using System.Threading.Tasks;
 
 namespace ClientApp.Core
 {
-    // Quản lý kết nối TCP đến server, nhận dữ liệu JSON và deserialize thành FileChange.
-    // Hỗ trợ tự động reconnect khi mất kết nối.
+    
     public class ClientCore
     {
-        // ── Sự kiện / Callback ──────────────────────────────────────────────
-        // Gọi khi nhận được thông báo thay đổi file từ server
         public Action<FileChange> OnChangeReceived;
-        // Gọi khi trạng thái kết nối thay đổi (truyền chuỗi mô tả trạng thái)
         public Action<string> OnStatusChange;
         public Action<string> OnFolderReceived;
-        // ── Trạng thái nội bộ ────────────────────────────────────────────────
         private TcpClient _client;
         private bool _isRunning;
         private string _host;
         private int _port;
-
-        // Buffer để ghép các TCP chunk thành message hoàn chỉnh
         private readonly StringBuilder _buffer = new StringBuilder();
-
-        // ── Kết nối / Ngắt kết nối ───────────────────────────────────────────
         public void Connect(string host, int port)
         {
             if (_isRunning) return;
@@ -50,8 +41,6 @@ namespace ClientApp.Core
             _client = null; 
             OnStatusChange?.Invoke("Disconnected");
         }
-
-        // ── Vòng lặp nhận dữ liệu (có tự động reconnect) ────────────────────
         private void ReceiveLoop()
         {
             while (_isRunning)
@@ -61,15 +50,12 @@ namespace ClientApp.Core
                     _client = new TcpClient();
                     _client.Connect(_host, _port);
                     OnStatusChange?.Invoke($"Connected to {_host}:{_port}");
-
                     var stream = _client.GetStream();
                     byte[] chunk = new byte[4096];
-
-                    // Đọc liên tục từ stream cho đến khi mất kết nối
                     while (_isRunning)
                     {
                         int bytesRead = stream.Read(chunk, 0, chunk.Length);
-                        if (bytesRead == 0) break; // Server đóng kết nối
+                        if (bytesRead == 0) break; 
 
                         // Thêm chunk vào buffer và xử lý message hoàn chỉnh
                         _buffer.Append(Encoding.UTF8.GetString(chunk, 0, bytesRead));
@@ -78,7 +64,7 @@ namespace ClientApp.Core
                 }
                 catch (Exception ex)
                 {
-                    if (!_isRunning) break;  // Ngắt kết nối chủ động → không reconnect
+                    if (!_isRunning) break;  
                     OnStatusChange?.Invoke($"Lost connection.({ex.Message})");
                 }
                 finally
@@ -92,10 +78,6 @@ namespace ClientApp.Core
                 }
             }
         }
-
-        // ── Xử lý buffer: tách từng JSON object hoàn chỉnh theo delimiter '\n' ──
-        // Server phải gửi mỗi message kết thúc bằng '\n'.
-        // Nếu server chưa gửi '\n', client vẫn hoạt động được nhờ thử parse trực tiếp.
         private void ProcessBuffer()
         {
             while (true)

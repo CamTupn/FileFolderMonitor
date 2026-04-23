@@ -11,7 +11,7 @@ namespace ClientApp.UI
         private ClientCore _client;
         private string _serverFolder;
 
-        // ── Cảnh báo: trạng thái bật/tắt và loại action cần cảnh báo ─────────
+        // ── Cảnh báo: trạng thái bật/tắt và loại action cần cảnh báo 
         private bool _alertEnabled = true;
         private bool _alertCreated = true;
         private bool _alertDeleted = true;
@@ -26,7 +26,7 @@ namespace ClientApp.UI
             btnDisconnect.Enabled = false;
             btnLoadHistory.Enabled = false;
 
-            // Đồng bộ trạng thái checkbox với biến
+          
             chkAlertEnable.Checked = _alertEnabled;
             chkAlertCreated.Checked = _alertCreated;
             chkAlertDeleted.Checked = _alertDeleted;
@@ -35,7 +35,7 @@ namespace ClientApp.UI
             UpdateAlertCheckboxState();
         }
 
-        // ── Nút Connect ─────────────────────────────────────────────────────
+        // ── Nút Connect 
         private void btnConnect_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtIP.Text))
@@ -72,7 +72,7 @@ namespace ClientApp.UI
                     lstLog.Items.Add(msg);
                     lstLog.TopIndex = lstLog.Items.Count - 1;
 
-                    // ── CẢNH BÁO ────────────────────────────────────────────
+                    // ── CẢNH BÁO 
                     TriggerAlert(change);
                 }));
             };
@@ -105,7 +105,7 @@ namespace ClientApp.UI
             _client.Connect(txtIP.Text.Trim(), port);
         }
 
-        // ── Nút Disconnect ───────────────────────────────────────────────────
+        // ── Nút Disconnect 
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
             _client?.Disconnect();
@@ -115,13 +115,13 @@ namespace ClientApp.UI
             btnLoadHistory.Enabled = false;
         }
 
-        // ── Nút Clear ────────────────────────────────────────────────────────
+        // ── Nút Clear 
         private void btnClear_Click(object sender, EventArgs e)
         {
             lstLog.Items.Clear();
         }
 
-        // ── Nút Load History ─────────────────────────────────────────────────
+        // ── Nút Load History 
         private void btnLoadHistory_Click(object sender, EventArgs e)
         {
             if (_client == null)
@@ -138,14 +138,14 @@ namespace ClientApp.UI
             _client.RequestHistory(_serverFolder);
         }
 
-        // ── Checkbox bật/tắt toàn bộ cảnh báo ───────────────────────────────
+        // ── Checkbox bật/tắt toàn bộ cảnh báo 
         private void chkAlertEnable_CheckedChanged(object sender, EventArgs e)
         {
             _alertEnabled = chkAlertEnable.Checked;
             UpdateAlertCheckboxState();
         }
 
-        // ── Checkbox từng loại action ────────────────────────────────────────
+        // ── Checkbox từng loại action 
         private void chkAlertCreated_CheckedChanged(object sender, EventArgs e)
             => _alertCreated = chkAlertCreated.Checked;
 
@@ -158,16 +158,14 @@ namespace ClientApp.UI
         private void chkAlertRenamed_CheckedChanged(object sender, EventArgs e)
             => _alertRenamed = chkAlertRenamed.Checked;
 
-        // ── Đóng form ────────────────────────────────────────────────────────
+        // ── Đóng form
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             _client?.Disconnect();
             base.OnFormClosing(e);
         }
 
-        // ════════════════════════════════════════════════════════════════════
-        // LOGIC CẢNH BÁO
-        // ════════════════════════════════════════════════════════════════════
+        
 
         // Kiểm tra điều kiện và kích hoạt cảnh báo
         private void TriggerAlert(FileChange change)
@@ -184,34 +182,26 @@ namespace ClientApp.UI
             }
             if (!shouldAlert) return;
 
-            // 1. Phát âm thanh cảnh báo hệ thống
+            //Phát âm thanh cảnh báo 
             SystemSounds.Exclamation.Play();
 
-            // 2. Nhấp nháy icon trên Taskbar
+            //Nhấp nháy icon trên Taskbar
             NativeMethods.FlashWindow(this.Handle);
 
-            // 3. Hiện balloon tooltip ở System Tray (nếu có NotifyIcon)
-            //    — hoặc hiện FrmAlert popup nhỏ không chặn UI
+            //Hiện balloon tooltip ở System Tray 
             ShowAlertPopup(change);
         }
-
         // Hiện cửa sổ cảnh báo nhỏ góc phải màn hình, tự động đóng sau 4 giây
         private void ShowAlertPopup(FileChange change)
         {
             var alert = new FrmAlert(change);
-
             // Tính vị trí góc phải dưới màn hình
             var screen = Screen.PrimaryScreen.WorkingArea;
             alert.Left = screen.Right - alert.Width - 10;
             alert.Top = screen.Bottom - alert.Height - 10;
 
-            alert.Show(this); // non-blocking, không chặn UI
+            alert.Show(this);
         }
-
-        // ════════════════════════════════════════════════════════════════════
-        // HELPER
-        // ════════════════════════════════════════════════════════════════════
-
         private void UpdateAlertCheckboxState()
         {
             // Khi tắt cảnh báo tổng thì disable các checkbox con để rõ ràng
@@ -221,13 +211,11 @@ namespace ClientApp.UI
             chkAlertModified.Enabled = on;
             chkAlertRenamed.Enabled = on;
         }
-
         private void SetStatus(string text, Color color)
         {
             lblStatus.Text = text;
             lblStatus.ForeColor = color;
         }
-
         private static string GetActionIcon(string action)
         {
             switch (action)

@@ -36,7 +36,7 @@
             this.grpAlert.SuspendLayout();
             this.SuspendLayout();
 
-            // ── btnConnect ───────────────────────────────────────────────────
+            // ── btnConnect 
             this.btnConnect.BackColor = System.Drawing.Color.FromArgb(128, 255, 128);
             this.btnConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F);
             this.btnConnect.Location = new System.Drawing.Point(465, 9);
@@ -47,7 +47,7 @@
             this.btnConnect.UseVisualStyleBackColor = false;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
 
-            // ── btnDisconnect ────────────────────────────────────────────────
+            // ── btnDisconnect 
             this.btnDisconnect.BackColor = System.Drawing.Color.FromArgb(255, 128, 128);
             this.btnDisconnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F);
             this.btnDisconnect.Location = new System.Drawing.Point(465, 57);
@@ -58,7 +58,7 @@
             this.btnDisconnect.UseVisualStyleBackColor = false;
             this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
 
-            // ── txtIP ────────────────────────────────────────────────────────
+            // ── txtIP 
             this.txtIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F);
             this.txtIP.Location = new System.Drawing.Point(90, 33);
             this.txtIP.Name = "txtIP";
@@ -66,28 +66,28 @@
             this.txtIP.TabIndex = 2;
             this.txtIP.Text = "127.0.0.1";
 
-            // ── txtPort ──────────────────────────────────────────────────────
+            // ── txtPort 
             this.txtPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F);
             this.txtPort.Location = new System.Drawing.Point(334, 33);
             this.txtPort.Name = "txtPort";
             this.txtPort.Size = new System.Drawing.Size(110, 27);
             this.txtPort.TabIndex = 3;
 
-            // ── lblIP ────────────────────────────────────────────────────────
+            // ── lblIP 
             this.lblIP.AutoSize = true;
             this.lblIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold);
             this.lblIP.Location = new System.Drawing.Point(25, 36);
             this.lblIP.Name = "lblIP";
             this.lblIP.Text = "IP";
 
-            // ── lblPort ──────────────────────────────────────────────────────
+            // ── lblPort 
             this.lblPort.AutoSize = true;
             this.lblPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold);
             this.lblPort.Location = new System.Drawing.Point(284, 36);
             this.lblPort.Name = "lblPort";
             this.lblPort.Text = "Port";
 
-            // ── lblLogHeader ─────────────────────────────────────────────────
+            // ── lblLogHeader 
             this.lblLogHeader.AutoSize = true;
             this.lblLogHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold);
             this.lblLogHeader.ForeColor = System.Drawing.Color.DimGray;
@@ -95,7 +95,7 @@
             this.lblLogHeader.Name = "lblLogHeader";
             this.lblLogHeader.Text = "TIME        ACTION      FILE NAME";
 
-            // ── lstLog ───────────────────────────────────────────────────────
+            // ── lstLog 
             this.lstLog.Font = new System.Drawing.Font("Consolas", 9.5F);
             this.lstLog.FormattingEnabled = true;
             this.lstLog.HorizontalScrollbar = true;
@@ -105,7 +105,7 @@
             this.lstLog.Size = new System.Drawing.Size(550, 190);
             this.lstLog.TabIndex = 4;
 
-            // ── grpAlert (GroupBox cảnh báo) ─────────────────────────────────
+            // ── grpAlert 
             this.grpAlert.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold);
             this.grpAlert.Location = new System.Drawing.Point(25, 330);
             this.grpAlert.Name = "grpAlert";
@@ -161,7 +161,7 @@
             this.grpAlert.Controls.Add(this.chkAlertModified);
             this.grpAlert.Controls.Add(this.chkAlertRenamed);
 
-            // ── btnLoadHistory ────────────────────────────────────────────────
+            // ── btnLoadHistory 
             this.btnLoadHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             this.btnLoadHistory.Location = new System.Drawing.Point(330, 396);
             this.btnLoadHistory.Name = "btnLoadHistory";
@@ -171,7 +171,7 @@
             this.btnLoadHistory.UseVisualStyleBackColor = true;
             this.btnLoadHistory.Click += new System.EventHandler(this.btnLoadHistory_Click);
 
-            // ── btnClear ─────────────────────────────────────────────────────
+            // ── btnClear 
             this.btnClear.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F);
             this.btnClear.Location = new System.Drawing.Point(460, 396);
             this.btnClear.Name = "btnClear";
@@ -181,7 +181,7 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
 
-            // ── lblStatus ────────────────────────────────────────────────────
+            // ── lblStatus 
             this.lblStatus.AutoSize = true;
             this.lblStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F);
             this.lblStatus.ForeColor = System.Drawing.Color.Gray;
@@ -189,7 +189,7 @@
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Text = "Waiting...";
 
-            // ── FrmClient ─────────────────────────────────────────────────────
+            // ── FrmClient 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(600, 440);

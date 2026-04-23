@@ -13,10 +13,10 @@ namespace ClientApp.UI
 
         public FrmAlert(FileChange change)
         {
-            // ── Thiết lập form ───────────────────────────────────────────────
-            this.FormBorderStyle = FormBorderStyle.None;        // không có title bar
-            this.TopMost = true;                         // luôn trên cùng
-            this.ShowInTaskbar = false;                        // không hiện trên taskbar
+           
+            this.FormBorderStyle = FormBorderStyle.None;       
+            this.TopMost = true;                        
+            this.ShowInTaskbar = false;                       
             this.Size = new Size(300, 80);
             this.BackColor = GetAlertColor(change.Action);
             this.Opacity = 0.93;
@@ -70,7 +70,7 @@ namespace ClientApp.UI
             this.Controls.Add(lblTime);
             this.Controls.Add(btnClose);
 
-            // Click vào popup cũng đóng
+         
             this.Click += (s, e) => this.Close();
             lblTitle.Click += (s, e) => this.Close();
             lblFile.Click += (s, e) => this.Close();
@@ -85,16 +85,16 @@ namespace ClientApp.UI
             _timer.Start();
         }
 
-        // ── Helper ──────────────────────────────────────────────────────────
+      
         private static Color GetAlertColor(string action)
         {
             switch (action)
             {
-                case "Created": return Color.FromArgb(40, 167, 69);   // xanh lá
-                case "Deleted": return Color.FromArgb(220, 53, 69);   // đỏ
-                case "Modified": return Color.FromArgb(0, 123, 255);   // xanh dương
-                case "Renamed": return Color.FromArgb(255, 140, 0);   // cam
-                default: return Color.FromArgb(108, 117, 125); // xám
+                case "Created": return Color.FromArgb(40, 167, 69);   
+                case "Deleted": return Color.FromArgb(220, 53, 69);   
+                case "Modified": return Color.FromArgb(0, 123, 255);  
+                case "Renamed": return Color.FromArgb(255, 140, 0);  
+                default: return Color.FromArgb(108, 117, 125); 
             }
         }
 
@@ -110,7 +110,7 @@ namespace ClientApp.UI
             }
         }
 
-        // Rút gọn đường dẫn dài để vừa popup
+      
         private static string TruncatePath(string path, int maxLen)
         {
             if (string.IsNullOrEmpty(path) || path.Length <= maxLen) return path;
